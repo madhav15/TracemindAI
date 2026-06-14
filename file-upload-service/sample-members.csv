@@ -1,0 +1,11 @@
+memberId,name,mobile,email,communicationPreference
+M001,John Doe,9876543210,john.doe@example.com,EMAIL
+M002,Jane Smith,9876543211,jane.smith@example.com,SMS
+M003,Bob Johnson,9876543212,bob.johnson@example.com,PHONE
+M004,Alice Williams,9876543213,alice.williams@example.com,EMAIL
+M005,Charlie Brown,9876543214,charlie.brown@example.com,BOTH
+M006,Diana Prince,9876543215,diana.prince@example.com,SMS
+M007,Edward Norton,9876543216,edward.norton@example.com,PHONE
+M008,Fiona Green,9876543217,fiona.green@example.com,EMAIL
+M009,George Wilson,9876543218,george.wilson@example.com,BOTH
+M010,Hannah Montana,9876543219,hannah.montana@example.com,SMS

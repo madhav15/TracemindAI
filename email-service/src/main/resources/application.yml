@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: email-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tracemindai?currentSchema=tracemind
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: email-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 10
+    retry:
+      topic:
+        enabled: true
+        max-attempts: 3
+        delay: 1000
+        dlt-strategy: fail_on_error
+
+logging:
+  level:
+    root: INFO
+    com.tracemindai: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+
+server:
+  port: 8088
