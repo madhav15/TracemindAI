@@ -59,6 +59,7 @@ services:
       - "8089:8089"
     volumes:
       - splunk-data:/opt/splunk/var
+      - /Users/madhav/Projects/java/TracemindAI/logs:/hostlogs
     restart: unless-stopped
 
 volumes:
