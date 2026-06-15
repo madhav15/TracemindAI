@@ -1,6 +1,6 @@
 package com.tracemind.mcp.config;
 
-import com.tracemind.mcp.tool.JobTimelineTool;
+import com.tracemind.mcp.tool.*;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
@@ -10,9 +10,29 @@ import org.springframework.context.annotation.Configuration;
 public class McpServerConfig {
 
     @Bean
-    public ToolCallbackProvider jobTimelineToolCallbackProvider(JobTimelineTool jobTimelineTool) {
+    public ToolCallbackProvider toolCallbackProvider(
+            JobTimelineTool jobTimelineTool,
+            RecordTimelineTool recordTimelineTool,
+            FailedJobsTool failedJobsTool,
+            FailedEmailsTool failedEmailsTool,
+            RetryEventsTool retryEventsTool,
+            DltEventsTool dltEventsTool,
+            EventsByServiceTool eventsByServiceTool,
+            EventsByStageTool eventsByStageTool,
+            ProcessingDurationTool processingDurationTool,
+            JobSummaryTool jobSummaryTool) {
         return MethodToolCallbackProvider.builder()
-                .toolObjects(jobTimelineTool)
+                .toolObjects(
+                        jobTimelineTool,
+                        recordTimelineTool,
+                        failedJobsTool,
+                        failedEmailsTool,
+                        retryEventsTool,
+                        dltEventsTool,
+                        eventsByServiceTool,
+                        eventsByStageTool,
+                        processingDurationTool,
+                        jobSummaryTool)
                 .build();
     }
 }
