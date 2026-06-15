@@ -1,0 +1,18 @@
+package com.tracemindai.common.logging.enums;
+
+public enum ProcessAction {
+    CSV_RECEIVED,
+    JOB_CREATED,
+    RECORD_CREATED,
+    EVENT_PUBLISHED,
+    EVENT_CONSUMED,
+    VALIDATION_STARTED,
+    VALIDATION_COMPLETED,
+    VALIDATION_FAILED,
+    EMAIL_SENT,
+    PRINT_COMPLETED,
+    ARCHIVAL_STARTED,
+    ARCHIVAL_COMPLETED,
+    RETRY,
+    DLT_PUBLISHED
+}

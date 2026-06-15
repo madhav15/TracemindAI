@@ -20,33 +20,34 @@ import java.util.Map;
 @EnableKafka
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
+
     private final KafkaProperties kafkaProperties;
 
     @Bean
     public ConsumerFactory<String, EmailRequestEvent> consumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-            kafkaProperties.getBootstrapServers());
+                kafkaProperties.getBootstrapServers());
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG,
-            kafkaProperties.getConsumer().getGroupId());
+                kafkaProperties.getConsumer().getGroupId());
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-            StringDeserializer.class);
+                StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-            JsonDeserializer.class);
+                JsonDeserializer.class);
         configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE,
-            EmailRequestEvent.class.getName());
+                EmailRequestEvent.class.getName());
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-            kafkaProperties.getConsumer().getAutoOffsetReset().toString().toLowerCase());
+                kafkaProperties.getConsumer().getAutoOffsetReset().toString().toLowerCase());
 
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, EmailRequestEvent>
-            kafkaListenerContainerFactory() {
+    kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, EmailRequestEvent> factory =
-            new ConcurrentKafkaListenerContainerFactory<>();
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }

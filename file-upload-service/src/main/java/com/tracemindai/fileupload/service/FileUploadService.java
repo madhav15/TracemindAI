@@ -1,7 +1,10 @@
 package com.tracemindai.fileupload.service;
 
 import com.tracemindai.common.event.RecordCreatedEvent;
-import com.tracemindai.fileupload.config.Snowflake;
+import com.tracemindai.common.logging.ProcessLogger;
+import com.tracemindai.common.logging.enums.ProcessAction;
+import com.tracemindai.common.logging.enums.ProcessStage;
+import com.tracemindai.common.logging.enums.ProcessStatus;
 import com.tracemindai.fileupload.dto.FileUploadResponse;
 import com.tracemindai.fileupload.dto.MemberRecord;
 import com.tracemindai.fileupload.entity.Job;
@@ -23,13 +26,17 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FileUploadService {
+
+    private static final String SERVICE_NAME = "file-upload-service";
+    private static final String SOURCE_KAFKA = "topic:record-created";
+    private static final String JOB_STATUS_UPLOADED = "UPLOADED";
+    private static final String RECORD_STATUS_RECEIVED = "RECEIVED";
+
     private final JobRepository jobRepository;
     private final RecordRepository recordRepository;
     private final CsvParser csvParser;
     private final RecordProducer recordProducer;
-
-    private static final String JOB_STATUS_UPLOADED = "UPLOADED";
-    private static final String RECORD_STATUS_RECEIVED = "RECEIVED";
+    private final ProcessLogger processLogger;
 
     @Transactional
     public FileUploadResponse uploadCsv(MultipartFile file) {
@@ -38,10 +45,21 @@ public class FileUploadService {
         List<MemberRecord> memberRecords = csvParser.parse(file);
 
         Job job = createJob(file.getOriginalFilename(), memberRecords.size());
+
+        processLogger.log(SERVICE_NAME, ProcessStage.FILE_UPLOAD, ProcessAction.CSV_RECEIVED,
+                ProcessStatus.STARTED, "api:/api/jobs/upload",
+                job.getJobId(), null, null, null, job.getJobId(), null,
+                "CSV file received: " + file.getOriginalFilename() + " with " + memberRecords.size() + " records");
+
         log.info("Created job with id: {} for {} records", job.getId(), memberRecords.size());
 
         createRecords(job.getJobId(), memberRecords);
         log.info("Created {} record entries in database", memberRecords.size());
+
+        processLogger.log(SERVICE_NAME, ProcessStage.FILE_UPLOAD, ProcessAction.JOB_CREATED,
+                ProcessStatus.SUCCESS, "api:/api/jobs/upload",
+                job.getJobId(), null, null, null, job.getJobId(), null,
+                "Job created with " + memberRecords.size() + " records");
 
         return FileUploadResponse.builder()
                 .jobId(job.getJobId())
@@ -79,6 +97,11 @@ public class FileUploadService {
 
             recordRepository.save(record);
 
+            processLogger.log(SERVICE_NAME, ProcessStage.FILE_UPLOAD, ProcessAction.RECORD_CREATED,
+                    ProcessStatus.SUCCESS, "api:/api/jobs/upload",
+                    jobId, recordId, memberRecord.getMemberId(), null, jobId, recordId,
+                    "Record created for member: " + memberRecord.getMemberId());
+
             publishRecordCreatedEvent(jobId, recordId, memberRecord);
 
             log.debug("Created and published event for record: {}", recordId);
@@ -98,6 +121,11 @@ public class FileUploadService {
                 .build();
 
         recordProducer.publish(event);
+
+        processLogger.log(SERVICE_NAME, ProcessStage.FILE_UPLOAD, ProcessAction.EVENT_PUBLISHED,
+                ProcessStatus.SUCCESS, SOURCE_KAFKA,
+                jobId, recordId, memberRecord.getMemberId(), null, jobId, recordId,
+                "RecordCreatedEvent published for member: " + memberRecord.getMemberId());
     }
 
     private String getJobId() {

@@ -1,6 +1,10 @@
 package com.tracemindai.archival.service;
 
 import com.tracemindai.common.event.ArchivalRequestEvent;
+import com.tracemindai.common.logging.ProcessLogger;
+import com.tracemindai.common.logging.enums.ProcessAction;
+import com.tracemindai.common.logging.enums.ProcessStage;
+import com.tracemindai.common.logging.enums.ProcessStatus;
 import com.tracemindai.archival.entity.Archive;
 import com.tracemindai.archival.repository.ArchiveRepository;
 import com.tracemindai.archival.repository.JobRepository;
@@ -14,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ArchivalService {
+
+    private static final String SERVICE_NAME = "archival-service";
+    private static final String SOURCE_KAFKA = "topic:archival-request";
     private static final String STATUS_PROCESSING = "PROCESSING";
     private static final String STATUS_COMPLETED = "COMPLETED";
     private static final String STATUS_ARCHIVAL_COMPLETED = "ARCHIVAL_COMPLETED";
@@ -21,9 +28,16 @@ public class ArchivalService {
     private final ArchiveRepository archiveRepository;
     private final RecordRepository recordRepository;
     private final JobRepository jobRepository;
+    private final ProcessLogger processLogger;
 
     @Transactional
     public void processArchivalRequest(ArchivalRequestEvent event) {
+        processLogger.log(SERVICE_NAME, ProcessStage.ARCHIVAL, ProcessAction.EVENT_CONSUMED,
+                ProcessStatus.STARTED, SOURCE_KAFKA,
+                event.getJobId(), event.getRecordId(), event.getMemberId(), null,
+                event.getCorrelationId(), event.getTraceId(),
+                "Archival request received for processing");
+
         log.info("[jobId={}][recordId={}][memberId={}] Starting archival processing",
             event.getJobId(), event.getRecordId(), event.getMemberId());
 
@@ -35,6 +49,13 @@ public class ArchivalService {
             .build();
 
         archiveRepository.save(archivalJob);
+
+        processLogger.log(SERVICE_NAME, ProcessStage.ARCHIVAL, ProcessAction.ARCHIVAL_STARTED,
+                ProcessStatus.STARTED, SOURCE_KAFKA,
+                event.getJobId(), event.getRecordId(), event.getMemberId(), null,
+                event.getCorrelationId(), event.getTraceId(),
+                "Archival started for record");
+
         log.debug("Saved archival job for recordId: {}", event.getRecordId());
 
         int i = recordRepository.updateStatusByRecordId(event.getRecordId(), STATUS_ARCHIVAL_COMPLETED);
@@ -52,6 +73,13 @@ public class ArchivalService {
 
         archivalJob.setStatus(STATUS_COMPLETED);
         archiveRepository.save(archivalJob);
+
+        processLogger.log(SERVICE_NAME, ProcessStage.ARCHIVAL, ProcessAction.ARCHIVAL_COMPLETED,
+                ProcessStatus.SUCCESS, SOURCE_KAFKA,
+                event.getJobId(), event.getRecordId(), event.getMemberId(), null,
+                event.getCorrelationId(), event.getTraceId(),
+                "Archival completed for record");
+
         log.debug("Marked archival job as COMPLETED for recordId: {}", event.getRecordId());
 
         log.info("[jobId={}][recordId={}][memberId={}] Archival processing completed",

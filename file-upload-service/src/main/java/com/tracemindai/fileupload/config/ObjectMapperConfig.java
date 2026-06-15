@@ -1,4 +1,4 @@
-package com.tracemindai.archival.config;
+package com.tracemindai.fileupload.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

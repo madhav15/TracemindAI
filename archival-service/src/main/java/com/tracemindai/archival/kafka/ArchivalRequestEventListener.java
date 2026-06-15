@@ -1,6 +1,10 @@
 package com.tracemindai.archival.kafka;
 
 import com.tracemindai.common.event.ArchivalRequestEvent;
+import com.tracemindai.common.logging.ProcessLogger;
+import com.tracemindai.common.logging.enums.ProcessAction;
+import com.tracemindai.common.logging.enums.ProcessStage;
+import com.tracemindai.common.logging.enums.ProcessStatus;
 import com.tracemindai.archival.service.ArchivalService;
 import com.tracemindai.archival.service.DltEventService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +22,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ArchivalRequestEventListener {
+
+    private static final String SERVICE_NAME = "archival-service";
+    private static final String SOURCE_KAFKA = "topic:archival-request";
+
     private final ArchivalService archivalService;
     private final DltEventService dltEventService;
+    private final ProcessLogger processLogger;
 
     @RetryableTopic(
         attempts = "3",
@@ -30,6 +39,12 @@ public class ArchivalRequestEventListener {
     )
     @KafkaListener(topics = "archival-request", groupId = "archival-service-group")
     public void onArchivalRequest(ArchivalRequestEvent event) {
+        processLogger.log(SERVICE_NAME, ProcessStage.ARCHIVAL, ProcessAction.EVENT_CONSUMED,
+                ProcessStatus.STARTED, SOURCE_KAFKA,
+                event.getJobId(), event.getRecordId(), event.getMemberId(), null,
+                event.getCorrelationId(), event.getTraceId(),
+                "ArchivalRequestEvent received for processing");
+
         log.info("Received ArchivalRequestEvent for recordId: {} from jobId: {}",
             event.getRecordId(), event.getJobId());
 
@@ -38,9 +53,18 @@ public class ArchivalRequestEventListener {
 
     @DltHandler
     public void dlt(ConsumerRecord<String, ArchivalRequestEvent> record) {
+        ArchivalRequestEvent event = record.value();
         log.error("Message moved to DLT. partition={}, offset={}, recordId={}",
-            record.partition(), record.offset(), record.value().getRecordId());
-        dltEventService.save("archival-service", record.value(),
+            record.partition(), record.offset(), event.getRecordId());
+
+        processLogger.logFailure(SERVICE_NAME, ProcessStage.DLT, ProcessAction.DLT_PUBLISHED,
+                "topic:" + record.topic(),
+                event.getJobId(), event.getRecordId(), event.getMemberId(),
+                null, event.getCorrelationId(), event.getTraceId(),
+                "All retry attempts exhausted, message routed to dead letter topic",
+                "DLT_RECEIVED", "Message failed after max retries", 3);
+
+        dltEventService.save("archival-service", event,
             new Exception("Message failed after max retries"));
     }
 }

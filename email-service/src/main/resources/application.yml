@@ -34,8 +34,6 @@ logging:
   level:
     root: INFO
     com.tracemindai: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 
 server:
