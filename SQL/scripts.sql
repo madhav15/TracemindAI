@@ -134,7 +134,7 @@ CREATE TABLE archival_job (
 );
 
 
--- 
+--
 -- BEGIN;
 --
 -- TRUNCATE TABLE
@@ -148,3 +148,33 @@ CREATE TABLE archival_job (
 -- RESTART IDENTITY CASCADE;
 --
 -- COMMIT;
+
+-- ########################################################
+
+-- Vector DB
+
+-- ########################################################
+
+CREATE EXTENSION vector;
+
+SELECT extname
+FROM pg_extension;
+
+CREATE TABLE knowledge_document (
+    id BIGSERIAL PRIMARY KEY,
+
+    document_name VARCHAR(255),
+
+    chunk_id INTEGER,
+
+    content TEXT,
+
+    embedding VECTOR(1536),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE INDEX knowledge_embedding_idx
+ON knowledge_document
+USING ivfflat (embedding vector_cosine_ops);

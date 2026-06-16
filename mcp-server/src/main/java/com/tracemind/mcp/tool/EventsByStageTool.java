@@ -15,7 +15,28 @@ public class EventsByStageTool {
     }
 
     @Tool(name = "get_events_by_stage",
-            description = "Returns event statistics grouped by processing stage.")
+            description = """
+                    Purpose:
+                    Return aggregate event counts grouped by processing stage across the entire system.
+
+                    Use this tool when the user wants to understand the processing pipeline's health — which stages
+                    (e.g., validation, transformation, enrichment, delivery) have the most or fewest events, where
+                    bottlenecks or backlogs might exist, or how events progress through the pipeline stages.
+
+                    Example Questions:
+                    - Show event counts by stage
+                    - Which processing stage has the most events?
+                    - Where are events getting stuck in the pipeline?
+                    - What is the event distribution across stages?
+
+                    Returns:
+                    A count of events per processing stage, providing a view of how events are distributed
+                    across the pipeline's stages.
+
+                    Do Not Use:
+                    - For event counts grouped by service — use get_events_by_service instead
+                    - For details about a specific event's stage progression — use get_job_timeline or get_record_timeline
+                    - For failure counts by stage — combine with get_failed_jobs instead""")
     public SplunkSearchResponse getEventsByStage() {
         return eventsByStageService.getEventsByStage();
     }
