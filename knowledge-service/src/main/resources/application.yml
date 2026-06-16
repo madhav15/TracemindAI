@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: knowledge-service
+  main:
+    banner-mode: off
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tracemind_knowledge
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    root: WARN
+    com.tracemindai.knowledge: INFO
