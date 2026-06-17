@@ -20,7 +20,8 @@ public class McpServerConfig {
             EventsByServiceTool eventsByServiceTool,
             EventsByStageTool eventsByStageTool,
             ProcessingDurationTool processingDurationTool,
-            JobSummaryTool jobSummaryTool) {
+            JobSummaryTool jobSummaryTool,
+            SearchKnowledgeTool searchKnowledgeTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(
                         jobTimelineTool,
@@ -32,7 +33,8 @@ public class McpServerConfig {
                         eventsByServiceTool,
                         eventsByStageTool,
                         processingDurationTool,
-                        jobSummaryTool)
+                        jobSummaryTool,
+                        searchKnowledgeTool)
                 .build();
     }
 }

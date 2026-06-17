@@ -129,8 +129,8 @@ public class EmailService {
             throw new ValidationException("Invalid email address: " + event.getEmail());
         }
 
-        if (!MobileValidator.isValidMobileNumber(event.getMemberId())) {
-            throw new ValidationException("Invalid mobile number: " + event.getMemberId());
+        if (!MobileValidator.isValidMobileNumber(event.getMobile())) {
+            log.error("Mobile Number may not be valid, but email is valid for member {}", event.getMemberId());
         }
     }
 

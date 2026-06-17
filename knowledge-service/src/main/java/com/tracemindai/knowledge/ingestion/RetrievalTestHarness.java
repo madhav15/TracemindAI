@@ -1,8 +1,8 @@
 package com.tracemindai.knowledge.ingestion;
 
+import com.tracemindai.common.contract.knowledge.KnowledgeSearchResult;
 import com.tracemindai.knowledge.repository.KnowledgeDocumentRepository;
 import com.tracemindai.knowledge.service.KnowledgeSearchService;
-import com.tracemindai.knowledge.service.OpenAiEmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +11,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import java.util.List;
-import java.util.Map;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.tracemindai.knowledge")
@@ -46,16 +45,16 @@ public class RetrievalTestHarness {
             for (String q : queries) {
                 log.info("=== Query: {} ===", q);
                 try {
-                    List<Map<String, Object>> results = searchService.search(q, TOP_K);
+                    List<KnowledgeSearchResult> results = searchService.search(q, TOP_K);
                     if (results.isEmpty()) {
                         log.info("  (no results)");
                         continue;
                     }
                     for (int i = 0; i < results.size(); i++) {
-                        Map<String, Object> r = results.get(i);
+                        KnowledgeSearchResult r = results.get(i);
                         log.info("  #{}. doc={} chunk={} similarity={}",
-                                i + 1, r.get("documentName"), r.get("chunkId"), r.get("similarity"));
-                        String content = (String) r.get("content");
+                                i + 1, r.documentName(), r.chunkId(), r.similarityScore());
+                        String content = r.content();
                         String snippet = content.length() > 120 ? content.substring(0, 120) + "..." : content;
                         log.info("      snippet: {}", snippet.replace("\n", " "));
                     }

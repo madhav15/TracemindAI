@@ -28,7 +28,7 @@ spring:
       retries: 0
 
 server:
-  port: 8081
+  port: 8071
   servlet:
     context-path: /
 

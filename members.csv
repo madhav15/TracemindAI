@@ -1,3 +1,13 @@
 memberId,name,mobile,email,communicationPreference
 1001,John,9876543210,john@test.com,E
 1002,Alice,9999999999,alice@test.com,P
+TEST100,Test User 1,78979798769,invalid-email,E
+TEST101,Test User 2,4654646,user@,E
+TEST102,Test User 3,67786886,@gmail.com,E
+TEST103,Test User 4,46465490890,user..name@gmail.com,E
+TEST104,Test User 5,9998886665,user#gmail.com,E
+TEST105,Test User 6,9998886665,test6@company.org,E
+TEST106,Test User 7,9998886665,user7@example.com,P
+TEST107,Test User 8,9998886665,member8@gmail.com,P
+TEST108,Test User 9,9998886665,test9@company.org,E
+TEST109,Test User 10,9998886665,user10@example.com,E

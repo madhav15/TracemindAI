@@ -20,3 +20,6 @@ logging:
   level:
     root: WARN
     com.tracemindai.knowledge: INFO
+
+server:
+  port: 8081

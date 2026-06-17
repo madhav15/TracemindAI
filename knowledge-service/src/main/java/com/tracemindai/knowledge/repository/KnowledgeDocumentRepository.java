@@ -30,12 +30,15 @@ public interface KnowledgeDocumentRepository extends JpaRepository<KnowledgeDocu
     void updateEmbedding(@Param("id") Long id, @Param("embedding") String embedding);
 
     @Query(value = """
-            SELECT kd.id, kd.document_name, kd.chunk_id, kd.content, kd.created_at,
-                   1 - (kd.embedding <=> CAST(:embedding AS vector)) AS similarity
+            SELECT
+                kd.document_name AS documentName,
+                kd.chunk_id AS chunkId,
+                kd.content AS content,
+                1 - (kd.embedding <=> CAST(:embedding AS vector)) AS similarity
             FROM knowledge_document kd
             ORDER BY kd.embedding <=> CAST(:embedding AS vector)
             LIMIT :topK
             """, nativeQuery = true)
-    List<Object[]> findSimilarDocuments(@Param("embedding") String embedding,
-                                        @Param("topK") int topK);
+    List<KnowledgeSearchProjection> findSimilarDocuments(@Param("embedding") String embedding,
+                                                         @Param("topK") int topK);
 }
